@@ -1,0 +1,191 @@
+const express = require('express');
+const { Video, Course, Order } = require('../models');
+const { auth, isAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const router = express.Router();
+
+// ================= MULTER CONFIG ================= //
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // thư mục lưu file upload
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// ================= API ================= //
+
+// Upload video (admin)
+router.post('/', auth, isAdmin, upload.single('file'), async (req, res) => {
+    try {
+        const { title, duration, courseId } = req.body;
+
+        // kiểm tra khóa học
+        const course = await Course.findByPk(courseId);
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+
+        if (!req.file) return res.status(400).json({ error: 'No video file uploaded' });
+
+        const filePath = req.file.path; // đường dẫn lưu file
+
+        // tạo bản ghi video    
+
+        const video = await Video.create({
+            title,
+            url: filePath,
+            duration,
+            courseId
+        });
+
+        res.status(201).json(video);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Lấy tất cả video (admin)
+router.get('/', auth, isAdmin, async (req, res) => {
+    try {
+        const videos = await Video.findAll();
+        res.json(videos);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Lấy video theo khóa học (chỉ user đã mua mới xem được list)
+router.get('/course/:courseId', auth, async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        const course = await Course.findByPk(courseId);
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+
+        const order = await Order.findOne({
+            where: { userId: req.user.userId, courseId, status: 'paid' }
+        });
+        if (!order) return res.status(403).json({ error: 'You do not have access to this course' });
+
+        const videos = await Video.findAll({ where: { courseId } });
+        res.json(videos);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Stream video (user phải mua mới được xem)
+router.get('/stream/:videoId', auth, async (req, res) => {
+    try {
+        const video = await Video.findByPk(req.params.videoId, { include: Course });
+        if (!video) return res.status(404).json({ error: 'Video not found' });
+
+        // kiểm tra user có quyền truy cập khóa học này không
+        const order = await Order.findOne({
+            where: { userId: req.user.userId, courseId: video.Course.courseId, status: 'paid' }
+        });
+        if (!order) return res.status(403).json({ error: 'You do not have access to this video' });
+
+        const videoPath = path.join(__dirname, '..', video.url);
+        const videoStat = fs.statSync(videoPath);
+        const fileSize = videoStat.size;
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+            const chunksize = (end - start) + 1;
+            const file = fs.createReadStream(videoPath, { start, end });
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'video/mp4',
+            };
+
+            res.writeHead(206, head);
+            file.pipe(res);
+        } else {
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': 'video/mp4',
+            };
+            res.writeHead(200, head);
+            fs.createReadStream(videoPath).pipe(res);
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+router.post('/complete/:videoId', auth, async (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const uid = req.user.userId ;
+
+        const video = await Video.findByPk(videoId);
+        if (!video) return res.status(404).json({ error: 'Video not found' });
+
+        const { VideoProgress } = require('../models');
+
+        await VideoProgress.update(
+            { isCompleted: true },
+            { where: { userId: uid, videoId: video.videoId } }
+        ).then(async (rows) => {
+            if (rows[0] === 0) {
+                await VideoProgress.create({ userId: uid, videoId: video.videoId, isCompleted: true });
+            }
+        });
+
+
+        // Cập nhật tiến độ course
+        const { updateCourseProgress } = require('../utils/progressHelper');
+        await updateCourseProgress(uid, video.courseId);
+
+        return res.json({ msg: ' Video completed & progress updated' });
+    } catch (err) {
+        console.error('Error in /video/complete:', err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+// Xóa video (admin)
+router.delete('/:videoId', auth, isAdmin, async (req, res) => {
+    try {
+        const { videoId } = req.params;
+
+        // 1. Tìm video trong database
+        const video = await Video.findByPk(videoId);
+        if (!video) {
+            return res.status(404).json({ error: 'Video not found' });
+        }
+
+        // Lấy đường dẫn file
+        const videoPath = path.join(process.cwd(), video.url);
+
+        // 2. Xóa file vật lý khỏi thư mục 'uploads'
+        // Kiểm tra xem file có tồn tại không trước khi xóa
+        if (fs.existsSync(videoPath)) {
+            try {
+                fs.unlinkSync(videoPath);
+                // Xóa file thành công
+            } catch (fileErr) {
+                // Ghi lại lỗi xóa file nhưng vẫn tiếp tục để xóa DB record
+                console.error(`Error deleting file ${videoPath}:`, fileErr);
+            }
+        }
+
+        // 3. Xóa bản ghi video khỏi database
+        await video.destroy();
+
+        res.status(200).json({ message: 'Video deleted successfully' });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+module.exports = router;
