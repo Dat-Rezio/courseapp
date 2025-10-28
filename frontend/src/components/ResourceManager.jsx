@@ -13,7 +13,7 @@ const ResourceManager = () => {
         <Link to="/admin/videos" className={styles.actionButton}>Quản lí video</Link>
       </div>
       <div className={styles.resourceSection}>
-        <button className={styles.actionButton}>Quản lí exam</button>
+        <Link to="/admin/exams" className={styles.actionButton}>Quản lí exam</Link>
       </div>
     </div>
   );

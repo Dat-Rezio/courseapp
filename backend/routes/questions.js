@@ -42,4 +42,29 @@ router.delete('/:questionId', auth, isAdmin, async (req, res) => {
   }
 });
 
+// Sửa câu hỏi (Admin)
+router.put('/:questionId', auth, isAdmin, async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const { content, answer, correctAnswer } = req.body;
+
+    const question = await Question.findByPk(questionId);
+    if (!question) {
+      return res.status(404).json({ msg: 'Question not found' });
+    }
+
+    await question.update({
+      content,
+      answer,
+      correctAnswer
+    });
+
+    // Fetch và trả về câu hỏi đã cập nhật
+    const updatedQuestion = await Question.findByPk(questionId);
+    res.json(updatedQuestion);
+  } catch (err) {
+    res.status(500).json({ msg: 'Error updating question', error: err.message });
+  }
+});
+
 module.exports = router;

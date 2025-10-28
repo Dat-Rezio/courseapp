@@ -1,64 +1,79 @@
-/* Nội dung file: ResourceManager.module.css (đã cập nhật) */
+/* Nội dung file: ResourceManager.module.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .container {
   max-width: 1200px;
-  margin: 2rem auto;
+  margin: 3rem auto;
   padding: 2rem;
   font-family: "Inter", sans-serif;
   
-  /* Sử dụng Grid để sắp xếp các box */
   display: grid;
-  /* Tự động chia cột, mỗi cột tối thiểu 300px */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Tăng min-width lên một chút cho đẹp */
+  gap: 2.5rem; /* Tăng khoảng cách giữa các box */
 }
 
-/* Thêm style cho tiêu đề (h2) từ JSX */
 .container h2 {
-  /* Cho tiêu đề chiếm toàn bộ chiều ngang của grid */
   grid-column: 1 / -1;
   text-align: center;
   color: #e6007e;
-  margin-bottom: 2rem;
-  font-size: 2rem;
+  margin-bottom: 2.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
 }
 
 .resourceSection {
   background-color: #fff;
-  border: none; /* Bỏ border cũ */
-  border-radius: 12px; /* Bo góc nhiều hơn */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); /* Thêm shadow đẹp hơn */
-  padding: 2rem;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
-  /* Đảm bảo margin không bị trùng lặp khi dùng grid-gap */
-  margin-bottom: 0; 
+  border-radius: 16px; /* Bo tròn nhiều hơn cho hiện đại */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Shadow mềm mại hơn */
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .resourceSection:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-7px);
+  box-shadow: 0 15px 35px rgba(230, 0, 126, 0.15); /* Shadow màu hồng nhạt khi hover */
 }
 
+/* Style quan trọng cho component Link */
 .actionButton {
-  background-color: #e6007e; /* Màu chủ đạo */
-  color: white;
-  border: none;
-  padding: 1rem 1.5rem; /* Nút to hơn */
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.1rem; /* Chữ to rõ */
-  font-weight: 600;
-  font-family: "Inter", sans-serif; /* Dùng font Inter */
+  /* Màu sắc theo theme */
+  background-color: #e6007e;
+  color: #fff;
   
-  width: 100%; /* Cho nút bấm chiếm hết chiều rộng của card */
-  margin-right: 0; /* Bỏ margin cũ */
-  transition: background-color 0.2s ease;
+  /* Định dạng font */
+  font-family: "Inter", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  
+  /* Kích thước và khoảng cách */
+  padding: 1rem 2rem;
+  width: 100%;
+  border-radius: 12px;
+  border: none;
+  
+  /* CÁC THUỘC TÍNH QUAN TRỌNG CHO LINK */
+  display: block;           /* Để Link hoạt động như một khối (full width) */
+  text-decoration: none;    /* Loại bỏ gạch chân mặc định của thẻ a */
+  text-align: center;       /* Căn giữa chữ */
+  box-sizing: border-box;   /* Đảm bảo padding không làm vỡ layout */
+  
+  /* Hiệu ứng */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(230, 0, 126, 0.3); /* Thêm shadow nhẹ cho nút */
 }
 
 .actionButton:hover {
-  background-color: #c2006a; /* Màu đậm hơn khi hover */
+  background-color: #d10073; /* Màu đậm hơn khi hover */
+  box-shadow: 0 6px 15px rgba(230, 0, 126, 0.4); /* Tăng shadow khi hover */
+  transform: scale(1.02); /* Phóng to nhẹ khi hover */
+}
+
+.actionButton:active {
+  transform: scale(0.98); /* Hiệu ứng nhấn nút thực tế */
 }
