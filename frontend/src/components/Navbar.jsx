@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useContext } from "react";
+import { SearchContext } from "./SearchContext.jsx";
 import styles from "./styles/Navbar.module.css";
 import { IoSearch } from "react-icons/io5";
 import { FaRegUser } from "react-icons/fa";
@@ -8,6 +10,8 @@ function Navbar() {
   const [openMenu, setOpenMenu] = useState(null);
   const [username, setUsername] = useState(null); // ✅ lưu trạng thái người dùng
   const [role, setRole] = useState(null); // ✅ lưu vai trò người dùng
+  const [inputValue, setInputValue] = useState(""); // input search
+  const { setSearchTerm } = useContext(SearchContext); // từ context
   const navigate = useNavigate();
 
   // 🔍 Khi Navbar được render, kiểm tra token trong localStorage
@@ -36,6 +40,16 @@ function Navbar() {
     navigate("/");
   };
 
+  // Debounce search 300ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchTerm(inputValue);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [inputValue, setSearchTerm]);
+
+
   const handleToggleMenu = (menuName) => {
     setOpenMenu((prevMenu) => (prevMenu === menuName ? null : menuName));
   };
@@ -51,24 +65,6 @@ function Navbar() {
             </Link>
           </div>
         
-          {/* Subjects 
-          <div className={styles.courseList}>
-            <div
-              className={styles.dropdown}
-              onClick={() => handleToggleMenu("subjects")}
-            >
-              <span>Khóa học ▾</span>
-              {openMenu === "subjects" && (
-                <ul className={`${styles.dropdownMenu} ${styles.show}`}>
-                  <li>Tiếng Anh</li>
-                  <li>Tiếng Nhật</li>
-                  <li>Tiếng Trung</li>
-                  <li>Tiếng Hàn</li>
-                </ul>
-              )}
-            </div>
-          </div>
-            */}
           {username ? (
             <div className={styles.courseList}>
               <Link to="/my-courses" className={styles.dropdown} style={{ textDecoration: "none", color: "#e6007e"}}>
@@ -86,12 +82,13 @@ function Navbar() {
             </div>
           )}
 
+          {/* Search bar */}
           <div className={styles.searchBar}>
             <input
               type="text"
-              id="search"
-              name="search"
               placeholder="Tìm khóa học"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
             />
             <button type="submit">
               <IoSearch size={24} />
