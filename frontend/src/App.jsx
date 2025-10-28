@@ -8,6 +8,9 @@ import MyCoursesPage from "./pages/MyCoursesPage.jsx";
 import VideoListPage from "./pages/VideoListPage.jsx";
 import ExamPage from "./pages/ExamPage.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
+import ResourceManagerPage from "./pages/ResourceManagerPage.jsx";
+import CourseManagementPage from "./pages/CourseManagementPage.jsx";
+import VideoManagementPage from "./pages/VideoManagementPage.jsx";
 
 
 
@@ -26,6 +29,9 @@ function App() {
           <Route path="/course/:courseId/videos" element={<VideoListPage />} />
           <Route path="/course/:courseId/exam/:examId" element={<ExamPage />} />
           <Route path="/payment/:courseId" element={<PaymentPage />} />
+          <Route path="/resource-management" element={<ResourceManagerPage />} />
+          <Route path="/admin/courses" element={<CourseManagementPage />} />
+          <Route path="/admin/videos" element={<VideoManagementPage />} />
         </Routes> 
     </Router>
       

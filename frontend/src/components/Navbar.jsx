@@ -7,16 +7,20 @@ import { Link, useNavigate } from "react-router-dom";
 function Navbar() {
   const [openMenu, setOpenMenu] = useState(null);
   const [username, setUsername] = useState(null); // ✅ lưu trạng thái người dùng
+  const [role, setRole] = useState(null); // ✅ lưu vai trò người dùng
   const navigate = useNavigate();
 
   // 🔍 Khi Navbar được render, kiểm tra token trong localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedUsername = localStorage.getItem("username");
+    const savedRole = localStorage.getItem("role"); // lấy vai trò
     if (token && savedUsername) {
       setUsername(savedUsername);
+      setRole(savedRole); // cập nhật vai trò
     } else {
       setUsername(null);
+      setRole(null);
     }
   }, []);
 
@@ -26,7 +30,9 @@ function Navbar() {
     localStorage.removeItem("username");
     localStorage.removeItem("userId");
     localStorage.removeItem("fullname");
+    localStorage.removeItem("role"); // xóa vai trò
     setUsername(null);
+    setRole(null);
     navigate("/");
   };
 
@@ -71,6 +77,14 @@ function Navbar() {
             </div>
             ) : null
           }
+
+          {role === 'admin' && (
+            <div className={styles.courseList}>
+              <Link to="/resource-management" className={styles.dropdown} style={{ textDecoration: "none", color: "#e6007e"}}>
+                Quản lí tài nguyên
+              </Link>
+            </div>
+          )}
 
           <div className={styles.searchBar}>
             <input

@@ -79,7 +79,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', auth, isAdmin, upload.single('image'), async (req, res) => {
   try {
     const { title, description, price } = req.body;
-    const imageUrl = req.file ? `/themes/${req.file.filename}` : null;
+    const imageUrl = req.file ? `/themes/${req.file.filename}` : '/themes/default.jpg';
 
     const course = await Course.create({
       title,

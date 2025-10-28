@@ -1,0 +1,64 @@
+/* Nội dung file: ResourceManager.module.css (đã cập nhật) */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+  
+  /* Sử dụng Grid để sắp xếp các box */
+  display: grid;
+  /* Tự động chia cột, mỗi cột tối thiểu 300px */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Thêm style cho tiêu đề (h2) từ JSX */
+.container h2 {
+  /* Cho tiêu đề chiếm toàn bộ chiều ngang của grid */
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #e6007e;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.resourceSection {
+  background-color: #fff;
+  border: none; /* Bỏ border cũ */
+  border-radius: 12px; /* Bo góc nhiều hơn */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); /* Thêm shadow đẹp hơn */
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  /* Đảm bảo margin không bị trùng lặp khi dùng grid-gap */
+  margin-bottom: 0; 
+}
+
+.resourceSection:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.actionButton {
+  background-color: #e6007e; /* Màu chủ đạo */
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem; /* Nút to hơn */
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem; /* Chữ to rõ */
+  font-weight: 600;
+  font-family: "Inter", sans-serif; /* Dùng font Inter */
+  
+  width: 100%; /* Cho nút bấm chiếm hết chiều rộng của card */
+  margin-right: 0; /* Bỏ margin cũ */
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: #c2006a; /* Màu đậm hơn khi hover */
+}
